@@ -1,0 +1,22 @@
+---
+title: "Project"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_knit$set(root.dir= normalizePath('..'))
+```
+
+
+# Project Report
+
+```{r}
+load.project()
+```
+
+```{r}
+bar_step<-ggplot(data=uni_ids[!is.na(uni_ids$last_step_completed),], aes(letter_code, fill=as.character(week_number)))
+bar_step+ggtitle("Stage Completed Most Recently vs Number of Students") + labs(x="Stage Completed Most Recently", y="Number of Students")+ theme(axis.text.x = element_text(angle = 90, hjust = 1)) +geom_bar() 
+```
+
