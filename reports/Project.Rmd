@@ -122,5 +122,14 @@ general_leaving_reason
 ```
 The non-repeat students frequently state that their reason for leaving was that they did not have enough time much like the repeat students. "Other" likely consists of multiple reasons for leaving more specific to the student. The course requiring more time than was realized was the reason given by 16 of the 143 respondents (11%). This may indicate that expectations for the course timewise need to be managed early which may even encourage those who would drop out otherwise to be retained for longer. It may also be worth trimming videos that fail to retain viewers after a certain amount of time so that the student does not feel that their time is being wasted. Reassessing which content is vital or could be streamlined could also help the students feel like the time they spend is worthwhile whilst simultaneously decresing the time required to work on the course.
 
-# Second Cycle
 
+
+```{r}
+another<-uni_ids%>%
+  left_join(union(cyber.security.6_enrolments, cyber.security.7_enrolments), by=c("learner_id"))
+uni_ids$retention_time_days<-(uni_ids$date_of_last/86400)-(as.numeric(as.POSIXct(another$enrolled_at ,format="%Y-%m-%d %H:%M:%S"))/86400)
+new_boxplot_graph<- ggplot(data=uni_ids, aes(x=ifelse(is.na(pass), F, pass), y=retention_time_days))
+new_boxplot_graph+geom_boxplot(aes(group=ifelse(is.na(pass), F, pass)))
+```
+
+# Second Cycle

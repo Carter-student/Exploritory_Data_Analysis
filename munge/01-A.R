@@ -6,9 +6,11 @@ id7<-cyber.security.7_enrolments%>%
 
 uni_ids<-dplyr::union(id6,id7)
 nrow(id7)
-nrow(uni_ids)-sum( uni_ids$learner_id %in% repeat_students$learner_id)
 repeat_students<-intersect(id6, id7)
+
+nrow(uni_ids)-sum( uni_ids$learner_id %in% repeat_students$learner_id)
 uni_ids<-uni_ids[!uni_ids$learner_id %in% repeat_students$learner_id,]
+
 
 nrow(uni_ids)
 nrow(repeat_students)
@@ -83,6 +85,7 @@ hold$last_completed_at<- hold$last_completed_at %>%
 tmp_vector<-numeric(length=length(uniques_6_7))
 step_position<-numeric(length=length(uniques_6_7))
 for_colour<-numeric(length = length(uniques_6_7))
+end_date<-numeric(length = length(uniques_6_7))
 for(i in 1:length(uniques_6_7)){
   tmp<-select(hold, learner_id, last_completed_at) %>%
     filter(learner_id==uniques_6_7[i]) %>%
@@ -92,12 +95,33 @@ for(i in 1:length(uniques_6_7)){
     tmp_vector[i]<-paste(hold$week_number[max_tmp], hold$step_number[max_tmp],sep=".")
     step_position[i]<-paste(letters[hold$week_number[max_tmp]], letters[hold$step_number[max_tmp]], sep="")
     for_colour[i]<-as.integer(hold$week_number[max_tmp])
+    end_date[i]<-hold$last_completed_at[max_tmp]
     }
   else{tmp_vector[i]<-NA
   step_position[i]<-NA
-  for_colour[i]<-NA}
+  for_colour[i]<-NA
+  end_date[i]<-NA}
   }
-h6_7<-data.frame(learner_id=uniques_6_7, last_step_completed=tmp_vector, letter_code=step_position, week_number=for_colour)
+h6_7<-data.frame(learner_id=uniques_6_7, last_step_completed=tmp_vector, letter_code=step_position, week_number=for_colour, date_of_last=end_date )
 uni_ids<-left_join(uni_ids, h6_7, by=c("learner_id"))
 
 uni_ids<-uni_ids %>% arrange(letter_code)
+uni_ids<-uni_ids %>%
+mutate(question_score=mean*Q_count)
+#To force uni_ids$last_step_completed into a particular order in graphs we set the levels
+#after it has been arranged
+uni_ids$last_step_completed<-factor(uni_ids$last_step_completed, levels = unique(uni_ids$last_step_completed))
+
+
+
+general_leaving_reason<- left_join(uni_ids[,1], union(cyber.security.7_leaving.survey.responses, cyber.security.6_leaving.survey.responses), by=c("learner_id"))
+reasons<-unique(general_leaving_reason$leaving_reason)
+frequency<-sapply(reasons, function(i){length(which(general_leaving_reason$leaving_reason==i))})
+reasons[2]<- "I don't have enough time"
+reasons[4]<- "The course wasn't what I expected"
+reasons[6]<- " The course won't help me reach my goals"
+frequency<-as.numeric(frequency)
+frequency[length(frequency)+1]<- sum(frequency)
+general_leaving_reason<-arrange(data.frame(reasons=c(reasons, "Total"), frequency=frequency), frequency)
+general_leaving_reason$reasons<-factor(general_leaving_reason$reasons, levels = general_leaving_reason$reasons)
+
