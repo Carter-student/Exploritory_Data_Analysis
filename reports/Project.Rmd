@@ -1,5 +1,6 @@
 ---
 title: "Project"
+author: "170339779"
 output: pdf_document
 ---
 
@@ -52,7 +53,7 @@ t_video$percent<-c(5,10,25,50,75,95,100)
 colnames(t_video)<-paste(c(rep("X",13), "percent"), c(1:13, ""), sep="")
 t_video<-pivot_longer(t_video, colnames(t_video)[-14])
 boxplot_graph<- ggplot(data=t_video, aes(x=percent, y=value))
-boxplot_graph+geom_boxplot(aes(group=percent))+ labs(title= "7th Dataset Video Stats Watchtime vs Students Still Watching Boxplot and Linear Regression",
+boxplot_graph+geom_boxplot(aes(group=percent))+ labs(title= "7th Dataset Video Stats Watchtime vs Students Still Watching Boxplot and \nLinear Regression",
                                                      x="Percentage of Video Watched- %",
                                                      y="Percentage still Viewing- %")+geom_smooth(method=lm, formula=y~x)
 ```
@@ -127,9 +128,30 @@ The non-repeat students frequently state that their reason for leaving was that 
 ```{r}
 another<-uni_ids%>%
   left_join(union(cyber.security.6_enrolments, cyber.security.7_enrolments), by=c("learner_id"))
-uni_ids$retention_time_days<-(uni_ids$date_of_last/86400)-(as.numeric(as.POSIXct(another$enrolled_at ,format="%Y-%m-%d %H:%M:%S"))/86400)
+if(mean(uni_ids$learner_id==another$learner_id)==1){
+uni_ids$retention_time_days<-(uni_ids$date_of_last/86400)-(as.numeric(as.POSIXct(another$enrolled_at ,format="%Y-%m-%d %H:%M:%S"))/86400)} else(print("INVALID LEARNER ID ORDER"))# A quality control mechanism to ensure the learner IDs line up in each dataset
 new_boxplot_graph<- ggplot(data=uni_ids, aes(x=ifelse(is.na(pass), F, pass), y=retention_time_days))
 new_boxplot_graph+geom_boxplot(aes(group=ifelse(is.na(pass), F, pass)))
+#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==F & !is.na(uni_ids$retention_time_days)))
+#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==T & !is.na(uni_ids$retention_time_days)))
+#commented out code to find sample sizes
 ```
+It is clear that retention time (retention time = the difference between the last task completed date and enrollment date) will correlate with weather or not an individual has a date for fully participating in the course (n=67) or an individual does not have a date for fully participating(n=2339). This graph shows that comparison but it also shows that there are individuals who did not achieve a fully participated date  and were retained for longer than those that did fully participate. Perhaps this is due to a lack of time leading them to return again and again but at larger intervals than the students who had enough time to fully participate. The median for retention time in days for the fully participated category of students is 22.88 days (2d.p, Interquartile range: 26.49 2d.p), which is close to the 3 full weeks so is not unexpected. Those that did not have a date for full participation had a median of 2.06 days (2d.p, Interquartile range: 18.35 2d.p). Median is selected here as the distribution appears skewed. Overall this line of investigation only goes to confirm what one could reasonably expect from the data. Although Identifying why highly retained individuals still did not archive a fully participated date may be a reasonable line of further investigation. Additionally at least one individual scored incredibly low in retention time (minimum 0.00782 days 3s.f) for the fully participated group, which may indicate an issue in the quality of our data. We should designate this individual as an outline in our dataset. Additionally our sample size for those who fully participated is very small and it may be better to only consider 
+
+```{r}
+uni_ids$country<-another$detected_country
+new_boxplot_graph<- ggplot(data=uni_ids, aes(x=ifelse(country=="GB", "Great Britain", "International"), y=retention_time_days))
+new_boxplot_graph+geom_boxplot(aes(group= ifelse(country=="GB", "Great Britain", "International")))
+#length(which(ifelse(uni_ids$country=="GB", "Great Britain", "International")=="Great Britain" & !is.na(uni_ids$country)))
+#length(which(ifelse(uni_ids$country=="GB", "Great Britain",
+#"International")=="International" & !is.na(uni_ids$country)))
+#Commented out code to find the sample sizes
+```
+A basic comparison between those detected to be International students and who were detected to be in Great Britain. To clarify this measure assumes that the detected country will be the same as the country of origin for that student which is most likely not the case for all students. However, using detected country of origin instead of reported country of origin can give us a more complete view as the many people did not provide their country. All further analysis will assume that, whilst virtual private networks and simply being in a different country could change the detected country, the average student's country of origin will be that of the detected country. Therefore conclusions should be viewed with this assumption in mind. There was a lower median retention time for detected International students (n=3926) than those detected to be in Great Britain (n= 1384). The aim of this analysis is to find ways that FutureLearn can better cater to all students and how they might better support those students. Therefore, further analysis into why the median is much lower for international students might be beneficial. Comparing English speaking countries to non-English speaking countries may allow for FutureLearn to determine if a language barrier plays a role in the lower median for International students. 
 
 # Second Cycle
+
+```{r}
+
+```
+
