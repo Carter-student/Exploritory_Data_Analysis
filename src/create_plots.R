@@ -1,0 +1,107 @@
+#Perform Analysis and Create plots
+bar_step<-ggplot(data=uni_ids[!is.na(uni_ids$last_step_completed),], aes(last_step_completed, fill=as.character(week_number)))
+stage_complete<-bar_step+ggtitle("Stage Completed Most Recently vs Number of Students") + labs(x="Stage Completed Most Recently", y="Number of Students")+ theme(axis.text.x = element_text(angle = 90, hjust = 1))+ scale_fill_discrete(name="Week:")+geom_bar()
+
+correlation_matrix<-uni_ids[,c("pass", "question_score", "Q_count", "mean")]%>%
+  as.matrix(nrow=nrow(uni_ids), ncol=3)%>%
+  cor(use = "complete.obs", method="pearson")
+
+t_video<-data.frame(t(cyber.security.7_video.stats[,9:15]))
+t_video$percent<-c(5,10,25,50,75,95,100)
+colnames(t_video)<-paste(c(rep("X",13), "percent"), c(1:13, ""), sep="")
+t_video<-pivot_longer(t_video, colnames(t_video)[-14])
+
+boxplot_graph<- ggplot(data=t_video, aes(x=percent, y=value))
+video_boxplot<-boxplot_graph+geom_boxplot(aes(group=percent))+ labs(title= "7th Dataset Video Stats Watchtime vs Students Still Watching Boxplot and \nLinear Regression",
+                                                     x="Percentage of Video Watched- %",
+                                                     y="Percentage still Viewing- %")+geom_smooth(method=lm, formula=y~x)
+
+first_attempt<-left_join(repeat_students,cyber.security.6_enrolments, by=c("learner_id"))
+second_attempt<-left_join(repeat_students,cyber.security.7_enrolments, by=c("learner_id"))
+
+
+
+statmentm2<-paste(nrow(first_attempt), " Repeated their studies (total)")
+
+statementm1<-second_attempt$learner_id[second_attempt$fully_participated_at!=""] %in% first_attempt$learner_id[first_attempt$fully_participated_at!=""] %>%
+  sum() %>%
+  paste(" Completed the course twice") 
+
+statment0<-second_attempt$learner_id[second_attempt$unenrolled_at!=""] %in% first_attempt$learner_id[first_attempt$unenrolled_at!=""] %>%
+  sum() %>%
+  paste(" Unenrolled in their first and second attempt", sep="")
+
+statement1<-paste(sum(first_attempt$fully_participated_at!=""), "fully participated the first time", sep=" ")
+statment2<-sum(second_attempt$fully_participated_at!="") %>%
+  paste("fully participated the second time", sep=" ")
+statment3<-sum(first_attempt$unenrolled_at!="")%>%
+  paste("unenrolled the first time", sep= " ")
+statment4<-sum(second_attempt$unenrolled_at!="") %>%
+  paste("unenrolled the second time", sep= " ")
+statement5<-sum(first_attempt$unenrolled_at=="") %>%
+  paste("Assumed did not finish the course the first time", sep= " ")
+statment6<-sum(second_attempt$unenrolled_at=="") %>%
+  paste("Assumed did not finish the course the second time", sep= " ")
+store_score<-mean(ifelse(is.na(uni_ids$pass)| uni_ids$pass==F, 0,1 )) %>%
+  round(4)
+statment7<-paste(store_score*100,"% of the non repeat students finished the course", sep="")
+unenroll_score<-mean(ifelse(uni_ids$unenroll_date==""|is.na(uni_ids$unenroll_date), 0,1 )) %>%
+  round(4)
+statment8<-paste(unenroll_score*100, "% of the non repeat students unenrolled from the course", sep="" )
+
+
+#We remove total from the bar chart as it is not relevant, NA has no occurrences due to
+#the way we made this dataset so it can be ignored as well
+total<-which(general_leaving_reason[,1]=="Total"| is.na(general_leaving_reason[,1]))
+bar_step_reason<-ggplot(data=general_leaving_reason[-total,], aes(reasons, frequency, fill=reasons))
+single_reason<-bar_step_reason+scale_fill_brewer(palette = "Blues")+ theme(legend.position = "none",axis.text.x = element_text(debug = NULL))+ geom_col()+coord_flip()+ labs(title="Single Attempt Students Reasons for Leaving" ,x="Reasons", y="Frequency")
+
+another<-uni_ids%>%
+  left_join(union(cyber.security.6_enrolments, cyber.security.7_enrolments), by=c("learner_id"))
+if(mean(uni_ids$learner_id==another$learner_id)==1){
+  uni_ids$retention_time_days<-(uni_ids$date_of_last/86400)-(as.numeric(as.POSIXct(another$enrolled_at ,format="%Y-%m-%d %H:%M:%S"))/86400)} else(print("INVALID LEARNER ID ORDER"))# A quality control mechanism to ensure the learner IDs line up in each dataset
+new_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days),], aes(x=ifelse(is.na(pass), F, pass), y=retention_time_days))
+pass_graph<-new_boxplot_graph+geom_boxplot(aes(group=ifelse(is.na(pass), F, pass)))
+#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==F & !is.na(uni_ids$retention_time_days)))
+#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==T & !is.na(uni_ids$retention_time_days)))
+#commented out code to find sample sizes
+
+uni_ids$country<-another$detected_country
+uni_ids$country<-ifelse(uni_ids$country=="--", NA, uni_ids$country)
+new_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days) & !is.na(uni_ids$country),], aes(x=ifelse(country=="GB", "Great Britain", "International"), y=retention_time_days))
+student_country_plot<-new_boxplot_graph+geom_boxplot(aes(group= ifelse(country=="GB", "Great Britain", "International")))
+#length(which(ifelse(uni_ids$country=="GB", "Great Britain", "International")=="Great Britain" & !is.na(uni_ids$country)))
+#length(which(ifelse(uni_ids$country=="GB", "Great Britain",
+#"International")=="International" & !is.na(uni_ids$country)))
+#Commented out code to find the sample sizes
+
+uni_ids$purchase_TF<-ifelse(is.na(uni_ids$purchase), F, T)
+purchase_and_pass<-length(which(uni_ids$purchase_TF==T & uni_ids$pass==T))
+purchase_not_pass<-length(which(uni_ids$purchase_TF==T & uni_ids$pass==F))
+purchase_na<-length(which(uni_ids$purchase_TF==T & is.na(uni_ids$pass)))
+twenty_one_days<-length(which(uni_ids$purchase_TF==T & uni_ids$retention_time_days>=21))
+purchase_not_pass<- purchase_na+purchase_not_pass
+total_purchases<-length(which(uni_ids$purchase_TF==T))
+bar_data<-data.frame(purchased=c(purchase_and_pass, purchase_not_pass, twenty_one_days,total_purchases), subsection=c("Fully Participated", "Incomplete Participation", "Retained for 21+ days", "Total Purchases"))
+bar_data<-arrange(bar_data, purchased)
+#bar_data$purchased<-factor(bar_data$purchased, levels=bar_data$purchased)
+bar_data$subsection<-factor(bar_data$subsection, levels=bar_data$subsection)
+plot_bar<-ggplot(data=bar_data, aes(subsection,purchased))
+purchase_bar<-plot_bar + geom_col(fill="#ADD8E6") + theme(legend.position = "none")+geom_text(aes(label = purchased), vjust = 2)
+
+#Logisitic regressions to show increase in odds ratio of buying certificate
+uni_ids$na_pass<-ifelse(is.na(uni_ids$pass), F, uni_ids$pass)
+fully_p<-glm(purchase_TF~na_pass, data = uni_ids, family="binomial")
+retention_time<-glm(purchase_TF~retention_time_days, data = uni_ids, family="binomial")
+uni_ids<-mutate(uni_ids, retention_21= ifelse(retention_time_days>=21,1,0))
+retention_TF<-glm(purchase_TF~retention_21, data = uni_ids, family="binomial")
+odds_increase<-c(exp(coef(fully_p)[2]), exp(coef(retention_TF)[2]))
+odds_increase<-odds_increase-1
+odds_increase<-odds_increase*100
+odds_increase<-paste(round(odds_increase,2), c("%", "%"), sep="")
+odds_increase<- data.frame(Condition=c("Fully Participated", "Retained >= 21 days"), Percentage_Increase=odds_increase)
+
+#Barchart of steps completed
+steps_completed_chart_ggplot<-ggplot(data= step_completions, aes(names.completions.))
+
+steps_completed_chart<-steps_completed_chart_ggplot + geom_col(alpha=0.2, aes(y=started, fill=as.character(week)), colour="#082321")+geom_col(alpha=1,aes(y=completions, fill=as.character(week)), width=0.5)+ scale_fill_discrete(name="Week:")+ theme(axis.text.x = element_text(angle = 90, hjust = 1, size=8)) 

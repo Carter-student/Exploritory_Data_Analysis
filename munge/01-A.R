@@ -22,8 +22,8 @@ pass_7<-cyber.security.7_enrolments$fully_participated_at %>%
   as.POSIXct(format="%Y-%m-%d %H:%M:%S") %>%
   as.numeric()
 
-pass_6_df<-data.frame(learner_id=cyber.security.6_enrolments$learner_id, pass_date=pass_6)
-pass_7_df<-data.frame(learner_id=cyber.security.7_enrolments$learner_id, pass_date=pass_7)
+pass_6_df<-data.frame(learner_id=cyber.security.6_enrolments$learner_id, pass_date=pass_6, purchase=as.POSIXct(cyber.security.6_enrolments$purchased_statement_at,format="%Y-%m-%d %H:%M:%S"))
+pass_7_df<-data.frame(learner_id=cyber.security.7_enrolments$learner_id, pass_date=pass_7, purchase=as.POSIXct(cyber.security.7_enrolments$purchased_statement_at,format="%Y-%m-%d %H:%M:%S"))
 
 nrow(uni_ids)
 uni_ids<-left_join(uni_ids, union(pass_6_df, pass_7_df), by=c("learner_id"), copy=T)
@@ -124,4 +124,20 @@ frequency<-as.numeric(frequency)
 frequency[length(frequency)+1]<- sum(frequency)
 general_leaving_reason<-arrange(data.frame(reasons=c(reasons, "Total"), frequency=frequency), frequency)
 general_leaving_reason$reasons<-factor(general_leaving_reason$reasons, levels = general_leaving_reason$reasons)
+
+hold<- union(cyber.security.7_step.activity, cyber.security.6_step.activity)
+hold<-mutate(hold, real_step= paste(week_number, step_number, sep="."))
+hold$TF_complete<- ifelse(hold$last_completed_at=="",F, T)
+completions<-sapply(unique(hold$real_step), function(i){sum(filter(hold, real_step==i)$TF_complete)})
+started<-sapply(unique(hold$real_step), function(i){length(filter(hold, real_step==i)$TF_complete)})
+
+hold$real_step<-factor(hold$real_step, levels = unique(uni_ids$last_step_completed))
+step_completions<-data.frame(names(completions), completions)
+row.names(step_completions)<-NULL
+#the below helps order the steps when plotting by designating explicit levels
+step_completions$names.completions.<-factor(step_completions$names.completions., levels=step_completions$names.completions.)
+step_completions$week<-ifelse(substr(step_completions$names.completions.,1,1)=="1", 1, ifelse(substr(step_completions$names.completions.,1,1)=="2",2,3))
+
+#what was the code below supposed to do?
+step_completions$started<-started
 

@@ -14,30 +14,36 @@ knitr::opts_knit$set(root.dir= normalizePath('..'))
 
 ```{r include=FALSE}
 library(ProjectTemplate)
-setwd("~/R/CSC8631- Project")
+setwd("~/R/CSC8631- Project")#REMOVE BEFORE SUBMISSION
 load.project()
+source('src/create_plots.R')
 ```
-
-FutureLearn have an interest in students finishing the course so that they might opt into buying the certificate at the end of the process. In order to complete the course a student must complete the pre-requesite steps over the 3 weeks. To see how far students get in the course we plotted a bar chart of the course steps against the number of students who's most recently completed stage was that step (See figure below). We used datasets 6 and 7 to achieve the figure immediately below.
-
-```{r}
-bar_step<-ggplot(data=uni_ids[!is.na(uni_ids$last_step_completed),], aes(last_step_completed, fill=as.character(week_number)))
-bar_step+ggtitle("Stage Completed Most Recently vs Number of Students") + labs(x="Stage Completed Most Recently", y="Number of Students")+ theme(axis.text.x = element_text(angle = 90, hjust = 1))+ scale_fill_discrete(name="Week:")+geom_bar() #scale_fill_manual uni_ids$last_step_completed
-```
-
-It is worth noting of the graph above that week 1 in general appears to have the most people continue no further. Additionally there is a spike at the very end of the 1st two weeks indicating that after that week the student completed no more steps. FutureLearn could foucus their efforts on smoothing over the periods between the weeks as much as possible so that students are ready to rejoin the following week. This could be achieved by reminding the students of the upcoming week and next load of steps. However, an alternative method might be to experiment with where the hardest parts of the workload fall for each week. In other words FurtureLearn could investigate as to whether putting the hardest part of the coursework  in the middle part of the steps for a given week prevents the spike at the end of the week. 
+## Business Understanding
+Data provided by FutureLearn, a for profit online education provider, have provided us with a large dataset to analyse and draw conclusions from. #Clarify Business objectives here 
 
 ```{r}
 summary(uni_ids)
 ```
-A summary of the data collected so far. Pass date and unenroll date have been converted to numerical to aid in the processing of data. The pass column is True if the student has a pass date and False if the student has an unenroll date. the pass column is NA if the student has neither a pass nor a unenroll date. The mean referes to the number of correct answers answered in the quiz questions divided by the total number of answered questions. The Q_count is the number of Quiz questions answered. The last step complete refers to the last step completed. The letter code is that last step completed converted into letters so that it can be sorted with 1.1 becoming "aa" and 2.1 becoming "ba" (each number indexes the alphabet). Week_number refers to the week in which they completed their last step and question score is simply the number of right answers a student achieved.
+
+A summary of the data collected so far. Pass date and unenroll date have been converted to numerical to aid in the processing of data. The pass column is True if the student has a pass date and False if the student has an unenroll date. the pass column is NA if the student has neither a pass nor a unenroll date. The mean referes to the number of correct answers answered in the quiz questions divided by the total number of answered questions. The Q_count is the number of Quiz questions answered. The last step complete refers to the last step completed. The letter code is that last step completed converted into letters so that it can be sorted with 1.1 becoming "aa" and 2.1 becoming "ba" (each number indexes the alphabet). Week_number refers to the week in which they completed their last step and question score is simply the number of right answers a student achieved. The purchase variable was added into the preprocessing during the second cycle and so is ignored throughout the first cycle.
+
+FutureLearn have an interest in students finishing the course so that they might opt into buying the certificate at the end of the process. In order to complete the course a student must complete the pre-requesite steps over the 3 weeks. To see how far students get in the course we plotted a bar chart of the course steps against the number of students who's most recently completed stage was that step (See figure below). We used datasets 6 and 7 to achieve the figure immediately below.
 
 ```{r}
-uni_ids[,c("pass", "question_score", "Q_count", "mean")]%>%
-  as.matrix(nrow=nrow(uni_ids), ncol=3)%>%
-  cor(use = "complete.obs")
+ #scale_fill_manual uni_ids$last_step_completed
+stage_complete
 ```
-Although only dealing with n=68 the above shows that Q_count may positively correlate to finishing the course. This would be expected as people who finish the course answer more questions.That this is not as strong a correlation as it could be indicates that some people who pass the course may not have answered more quesions than those who stopped. The small negative correlation between mean and pass may be due to those who finished only a on question and got it right (thus mean=1) and then did not finish any more of the course. Therefore it is clear that mean (quiz percentage of correct answers) would not be a good metric for identifying engagement as it cannot distinguish those who answer many questions and score well from those who score well and answer many questions.
+
+It is worth noting of the graph above that week 1 in general appears to have the most people continue no further. Additionally there is a spike at the very end of the 1st two weeks indicating that after that week the student completed no more steps. FutureLearn could foucus their efforts on smoothing over the periods between the weeks as much as possible so that students are ready to rejoin the following week. This could be achieved by reminding the students of the upcoming week and next load of steps. However, an alternative method might be to experiment with where the hardest parts of the workload fall for each week. In other words FurtureLearn could investigate as to whether putting the hardest part of the coursework  in the middle part of the steps for a given week prevents the spike at the end of the week. 
+
+
+```{r}
+
+correlation_matrix
+```
+
+
+Although only dealing with n=68 the above shows that Q_count may positively correlate to finishing the course. This would be expected as people who finish the course answer more questions.That this is not as strong a correlation as it could be indicates that some people who pass the course may not have answered more questions than those who stopped. The small negative correlation between mean and pass may be due to those who finished only a on question and got it right (thus mean=1) and then did not finish any more of the course. Therefore it is clear that mean (quiz percentage of correct answers) would not be a good metric for identifying engagement as it cannot distinguish those who answer many questions and score well from those who score well and answer many questions.
 
 ```{r}
 plot(uni_ids$mean, uni_ids$Q_count, col=uni_ids$pass+1)
@@ -45,61 +51,28 @@ plot(uni_ids$mean, uni_ids$Q_count, col=uni_ids$pass+1)
 Plotting percentage of correct answers divided by 100 against the number of questions answered. The at points are coloured red if we know that they fully participated. This plot is not  very useful as it can be expected that those who completed the course answered more questions completed the course but it does again confirm this.
 
 ```{r}
-plot(rep(c(5,10,25,50,75,95,100),13), t(cyber.security.7_video.stats[,9:15]),  type="p", col=1:13, ylab= "Percentage still Viewing- %", xlab = "Percentage of Video Watched- %", main= "7th Dataset Video Stats Watchtime vs Students Still Watching")
+plot(rep(c(5,10,25,50,75,95,100),13), t(cyber.security.7_video.stats[,9:15]),
+     type="p", col=1:13, ylab= "Percentage still Viewing- %",
+     xlab = "Percentage of Video Watched- %", 
+     main= "7th Dataset Video Stats Watchtime vs Students Still Watching")
 ```
 ```{r}
-t_video<-data.frame(t(cyber.security.7_video.stats[,9:15]))
-t_video$percent<-c(5,10,25,50,75,95,100)
-colnames(t_video)<-paste(c(rep("X",13), "percent"), c(1:13, ""), sep="")
-t_video<-pivot_longer(t_video, colnames(t_video)[-14])
-boxplot_graph<- ggplot(data=t_video, aes(x=percent, y=value))
-boxplot_graph+geom_boxplot(aes(group=percent))+ labs(title= "7th Dataset Video Stats Watchtime vs Students Still Watching Boxplot and \nLinear Regression",
-                                                     x="Percentage of Video Watched- %",
-                                                     y="Percentage still Viewing- %")+geom_smooth(method=lm, formula=y~x)
+video_boxplot
 ```
 
 This graph shows that as the videos continue the range of the percentage of people watching the videos increases. There is a noticeable downward trend across the graph especially after the first 10% and last 95% of the video. A drop before the last 5% could be the that students feel that the relevant material has already passed. A drop after the first 5% could mean that students were not engaged enough at the start or felt that it is irrelevant. In total the no video seems to be performing extremely poorly when compared to he other videos for the first 95% of the video, although the last 5% shows greater range of dange of viewer dropout. It might be worth considering which videos perform poorly in their last 5% and either shorten them or consider if the last 5% is contributing much. This graph serves as the first rough look into the video stats dataset. Viewing this same data with lines connecting the dots is misleading as R does not connect the points together well. 
 
 ```{r}
-first_attempt<-left_join(repeat_students,cyber.security.6_enrolments, by=c("learner_id"))
-second_attempt<-left_join(repeat_students,cyber.security.7_enrolments, by=c("learner_id"))
-
-
-
-statmentm2<-paste(nrow(first_attempt), " Repeated their studies (total)")
-
-statementm1<-second_attempt$learner_id[second_attempt$fully_participated_at!=""] %in% first_attempt$learner_id[first_attempt$fully_participated_at!=""] %>%
-  sum() %>%
-  paste(" Completed the course twice") 
-
-statment0<-second_attempt$learner_id[second_attempt$unenrolled_at!=""] %in% first_attempt$learner_id[first_attempt$unenrolled_at!=""] %>%
-  sum() %>%
-  paste(" Unenrolled in their first and second attempt", sep="")
-
-statement1<-paste(sum(first_attempt$fully_participated_at!=""), "fully participated the first time", sep=" ")
-statment2<-sum(second_attempt$fully_participated_at!="") %>%
-  paste("fully participated the second time", sep=" ")
-statment3<-sum(first_attempt$unenrolled_at!="")%>%
-  paste("unenrolled the first time", sep= " ")
-statment4<-sum(second_attempt$unenrolled_at!="") %>%
-  paste("unenrolled the second time", sep= " ")
-statement5<-sum(first_attempt$unenrolled_at=="") %>%
-  paste("Assumed did not finish the course the first time", sep= " ")
-statment6<-sum(second_attempt$unenrolled_at=="") %>%
-  paste("Assumed did not finish the course the second time", sep= " ")
-store_score<-mean(ifelse(is.na(uni_ids$pass)| uni_ids$pass==F, 0,1 )) %>%
-  round(4)
-statment7<-paste(store_score*100,"% of the non repeat students finished the course", sep="")
-unenroll_score<-mean(ifelse(uni_ids$unenroll_date==""|is.na(uni_ids$unenroll_date), 0,1 )) %>%
-  round(4)
-statment8<-paste(unenroll_score*100, "% of the non repeat students unenrolled from the course", sep="" )
-
-print(cat(statmentm2, "\n", statementm1, "\n", statment0, "\n", statement1, "\n", statment2, "\n", statment3, "\n", statment4, "\n", statement5, "\n", statment6, "\n", statment7, "\n", statment8, "\n"))
+cat(statmentm2, "\n", statementm1, "\n", statment0, "\n", statement1,
+    "\n", statment2, "\n", statment3, "\n", statment4, "\n", statement5,
+    "\n", statment6, "\n", statment7, "\n", statment8, "\n")
 ```
 Students who were found to be on the course in datasets 6 and 7 are assumed to have taken the course at least twice. They have not been included in our analysis so far and so now we seek to understand what happened to these students. 5 of the students who have a recorded fully participated date were in both datasets and one of them went on to have another fully participated date. It seems that the repeat students finished the course the first time at a rate greater than the non-repeat students which might be expected if they liked the course enough to complete it the first time and then enroll again. A greater proportion of repeat students unenrolled in their first attempt than the single attempt sample. Perhaps due to not enough time in the first attempt and then trying again the second time once they thought they had time. However, nobody who had not already finished the course in their first attempt finished the course in their second attempt suggesting that whatever the reason their first attempt ended prematurely may have also ended their second attempt. The reason for leaving the first and second time may be found in the leaving survey.
 
 ```{r}
-leaving_reason<-left_join(repeat_students, cyber.security.6_leaving.survey.responses, by=c("learner_id"))
+leaving_reason<-left_join(repeat_students,
+                          cyber.security.6_leaving.survey.responses,
+                          by=c("learner_id"))
 leaving_reason[!is.na(leaving_reason$leaving_reason), "leaving_reason"]
 ```
 We can see the reasons given by the students that repeated their studies above (if they left a reason). Half say that they did not have enough time for the course as we suggested previously. Only one says that the course was too easy and the others preferred not to say.
@@ -111,12 +84,7 @@ leaving_reason2[!is.na(leaving_reason2$leaving_reason), "leaving_reason"]
 For the second attempt it seems that once again the take away from the repeat students is that they left because they did not have enough time. Repeat students may require a less intensive course that could be better managed with a shorter amount of free time.
 
 ```{r}
-#We remove total from the bar chart as it is not relevant, NA has no occurrences due to
-#the way we made this dataset so it can be ignored as well
-total<-which(general_leaving_reason[,1]=="Total"| is.na(general_leaving_reason[,1]))
-bar_step_reason<-ggplot(data=general_leaving_reason[-total,], aes(reasons, frequency, fill=reasons))
-bar_step_reason+scale_fill_brewer(palette = "Blues")+ theme(legend.position = "none",axis.text.x = element_text(debug = NULL))+ geom_col()+coord_flip()+ labs(title="Single Attempt Students Reasons for Leaving" ,x="Reasons", y="Frequency")
-
+single_reason
 ```
 ```{r}
 general_leaving_reason
@@ -126,32 +94,32 @@ The non-repeat students frequently state that their reason for leaving was that 
 
 
 ```{r}
-another<-uni_ids%>%
-  left_join(union(cyber.security.6_enrolments, cyber.security.7_enrolments), by=c("learner_id"))
-if(mean(uni_ids$learner_id==another$learner_id)==1){
-uni_ids$retention_time_days<-(uni_ids$date_of_last/86400)-(as.numeric(as.POSIXct(another$enrolled_at ,format="%Y-%m-%d %H:%M:%S"))/86400)} else(print("INVALID LEARNER ID ORDER"))# A quality control mechanism to ensure the learner IDs line up in each dataset
-new_boxplot_graph<- ggplot(data=uni_ids, aes(x=ifelse(is.na(pass), F, pass), y=retention_time_days))
-new_boxplot_graph+geom_boxplot(aes(group=ifelse(is.na(pass), F, pass)))
-#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==F & !is.na(uni_ids$retention_time_days)))
-#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==T & !is.na(uni_ids$retention_time_days)))
-#commented out code to find sample sizes
+pass_graph
 ```
 It is clear that retention time (retention time = the difference between the last task completed date and enrollment date) will correlate with weather or not an individual has a date for fully participating in the course (n=67) or an individual does not have a date for fully participating(n=2339). This graph shows that comparison but it also shows that there are individuals who did not achieve a fully participated date  and were retained for longer than those that did fully participate. Perhaps this is due to a lack of time leading them to return again and again but at larger intervals than the students who had enough time to fully participate. The median for retention time in days for the fully participated category of students is 22.88 days (2d.p, Interquartile range: 26.49 2d.p), which is close to the 3 full weeks so is not unexpected. Those that did not have a date for full participation had a median of 2.06 days (2d.p, Interquartile range: 18.35 2d.p). Median is selected here as the distribution appears skewed. Overall this line of investigation only goes to confirm what one could reasonably expect from the data. Although Identifying why highly retained individuals still did not archive a fully participated date may be a reasonable line of further investigation. Additionally at least one individual scored incredibly low in retention time (minimum 0.00782 days 3s.f) for the fully participated group, which may indicate an issue in the quality of our data. We should designate this individual as an outline in our dataset. Additionally our sample size for those who fully participated is very small and it may be better to only consider 
 
 ```{r}
-uni_ids$country<-another$detected_country
-new_boxplot_graph<- ggplot(data=uni_ids, aes(x=ifelse(country=="GB", "Great Britain", "International"), y=retention_time_days))
-new_boxplot_graph+geom_boxplot(aes(group= ifelse(country=="GB", "Great Britain", "International")))
-#length(which(ifelse(uni_ids$country=="GB", "Great Britain", "International")=="Great Britain" & !is.na(uni_ids$country)))
-#length(which(ifelse(uni_ids$country=="GB", "Great Britain",
-#"International")=="International" & !is.na(uni_ids$country)))
-#Commented out code to find the sample sizes
+student_country_plot
 ```
 A basic comparison between those detected to be International students and who were detected to be in Great Britain. To clarify this measure assumes that the detected country will be the same as the country of origin for that student which is most likely not the case for all students. However, using detected country of origin instead of reported country of origin can give us a more complete view as the many people did not provide their country. All further analysis will assume that, whilst virtual private networks and simply being in a different country could change the detected country, the average student's country of origin will be that of the detected country. Therefore conclusions should be viewed with this assumption in mind. There was a lower median retention time for detected International students (n=3926) than those detected to be in Great Britain (n= 1384). The aim of this analysis is to find ways that FutureLearn can better cater to all students and how they might better support those students. Therefore, further analysis into why the median is much lower for international students might be beneficial. Comparing English speaking countries to non-English speaking countries may allow for FutureLearn to determine if a language barrier plays a role in the lower median for International students. 
 
 # Second Cycle
 
 ```{r}
-
+purchase_bar
 ```
+For all the analysis so far we have assumed that purchasing the course certificate was more likely if the individual finished the course. Before continuing we should confirm that assumption. With the limited dataset currently being used we show that twice as many people who fully participated in the course purchased the certificate. We also showed that those with a retention time of 21 days or made up over half of the people who bought the course. As we only utilise a dataset with only 54 people purchasing the certificate the proportions found here could be non representative of which people will purchase certificates in the future. However, these categories are very likely to represent an increase in the likelihood that a person buys the certificate as determined by logistic regression (see below) 
 
+
+```{r}
+odds_increase
+```
+The data frame above shows the result of the logistic regressions over the two conditions. The Percentage increase on the odds of purchasing the certificate was determined by computing the exponential function of the coefficient given by the logistic regression. The comparatively lower increase in for the retained for greater than or equal to 21 days group is due to the fact that there were far more in this group (people retained for 21 days or more) who did not buy the certificate. Both logistic regressions were shown to be significant at an alpha of 0.001.
+
+```{r}
+
+steps_completed_chart
+```
+Previously we showed last step students managed to complete, but this does not show the entire story. Individuals could compleate any combination of steps and therefore some information could be lost by only reporting the last.
+
+# number who completed step vs step number
