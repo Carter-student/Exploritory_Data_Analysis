@@ -56,18 +56,6 @@ total<-which(general_leaving_reason[,1]=="Total"| is.na(general_leaving_reason[,
 bar_step_reason<-ggplot(data=general_leaving_reason[-total,], aes(reasons, frequency, fill=reasons))
 single_reason<-bar_step_reason+scale_fill_brewer(palette = "Blues")+ theme(legend.position = "none",axis.text.x = element_text(debug = NULL))+ geom_col()+coord_flip()+ labs(title="Single Attempt Students Reasons for Leaving" ,x="Reasons", y="Frequency")
 
-another<-uni_ids%>%
-  left_join(union(cyber.security.6_enrolments, cyber.security.7_enrolments), by=c("learner_id"))
-if(mean(uni_ids$learner_id==another$learner_id)==1){
-  uni_ids$retention_time_days<-(uni_ids$date_of_last/86400)-(as.numeric(as.POSIXct(another$enrolled_at ,format="%Y-%m-%d %H:%M:%S"))/86400)} else(print("INVALID LEARNER ID ORDER"))# A quality control mechanism to ensure the learner IDs line up in each dataset
-new_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days),], aes(x=ifelse(is.na(pass), F, pass), y=retention_time_days))
-pass_graph<-new_boxplot_graph+geom_boxplot(aes(group=ifelse(is.na(pass), F, pass)))
-#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==F & !is.na(uni_ids$retention_time_days)))
-#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==T & !is.na(uni_ids$retention_time_days)))
-#commented out code to find sample sizes
-
-uni_ids$country<-another$detected_country
-uni_ids$country<-ifelse(uni_ids$country=="--", NA, uni_ids$country)
 new_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days) & !is.na(uni_ids$country),], aes(x=ifelse(country=="GB", "Great Britain", "International"), y=retention_time_days))
 student_country_plot<-new_boxplot_graph+geom_boxplot(aes(group= ifelse(country=="GB", "Great Britain", "International")))
 #length(which(ifelse(uni_ids$country=="GB", "Great Britain", "International")=="Great Britain" & !is.na(uni_ids$country)))
@@ -104,4 +92,27 @@ odds_increase<- data.frame(Condition=c("Fully Participated", "Retained >= 21 day
 #Barchart of steps completed
 steps_completed_chart_ggplot<-ggplot(data= step_completions, aes(names.completions.))
 
-steps_completed_chart<-steps_completed_chart_ggplot + geom_col(alpha=0.2, aes(y=started, fill=as.character(week)), colour="#082321")+geom_col(alpha=1,aes(y=completions, fill=as.character(week)), width=0.5)+ scale_fill_discrete(name="Week:")+ theme(axis.text.x = element_text(angle = 90, hjust = 1, size=8)) 
+steps_completed_chart<-steps_completed_chart_ggplot + labs(title="Students who Started and Students who Finished Each Step", x="Step Number", y="Number of Students") + geom_col(alpha=0.2, aes(y=started, fill=as.character(week)), colour="#082321")+geom_col(alpha=1,aes(y=completions, fill=as.character(week)), width=0.5)+ scale_fill_discrete(name="Week:")+ theme(axis.text.x = element_text(angle = 90, hjust = 1, size=8)) 
+
+#Language boxplot
+#These countries were determined to speak English as a first language in the majority.
+maj_ENG_speak<-c("GB","NZ", "US", "AU", "CA" ,"IE")
+language_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days) & !is.na(uni_ids$country),], aes(x=ifelse(country %in% maj_ENG_speak, "Majority Speak English as 1st Language ", "Other Languages Spoken 1st"), y=retention_time_days))
+student_language_plot<-language_boxplot_graph+geom_boxplot(aes(group= ifelse(country %in% maj_ENG_speak, "Majority Speak English as 1st Language ", "Other Languages Spoken 1st")))
+
+#Remove countries that had less than 25 students as their boxplots are misleading
+country_positions_to_consider<-which(uni_ids$country%in%country_retention[country_retention$n>=25,"country_name"] & !is.na(uni_ids$retention_time_days))
+language_boxplot_graph_25<- ggplot(data=uni_ids[country_positions_to_consider,], aes(x=country, y=retention_time_days, fill=(ifelse(country %in% maj_ENG_speak,1,"none"))))
+student_language_plot_25<-language_boxplot_graph_25+geom_boxplot(aes(country, retention_time_days))+ theme(legend.position = "none")
+
+plot_countries<-ggplot(data = country_retention[country_retention$n_All>25,], aes(country_name, y=n_All))+geom_col()+ coord_flip()
+
+#+geom_text(data = country_retention, aes(x=country_name, label = n), position = position_dodge(width = .75),show.legend = FALSE)
+
+#Rubbish REMOVE LATER
+#ggplot_country_data<-ggplot(country_retention,aes(country_name,median,fill=(ifelse(country_name %in% maj_ENG_speak,1,0))))
+#ggplot_country_data+ geom_col()+ theme(legend.position = "none")+ geom_errorbar(data=country_retention,aes(x=country_name, ymin=LQ, ymax=UQ))
+
+#language_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days) & !is.na(uni_ids$country),], aes(country, y=retention_time_days,fill=(ifelse(country %in% maj_ENG_speak,1,"none"))))
+#student_language_plot<-language_boxplot_graph+geom_boxplot()+ theme(legend.position = "none")+ coord_flip()+theme(axis.text=element_text(size=6))
+#student_language_plot

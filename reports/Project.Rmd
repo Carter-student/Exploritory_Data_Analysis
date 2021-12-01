@@ -101,7 +101,7 @@ It is clear that retention time (retention time = the difference between the las
 ```{r}
 student_country_plot
 ```
-A basic comparison between those detected to be International students and who were detected to be in Great Britain. To clarify this measure assumes that the detected country will be the same as the country of origin for that student which is most likely not the case for all students. However, using detected country of origin instead of reported country of origin can give us a more complete view as the many people did not provide their country. All further analysis will assume that, whilst virtual private networks and simply being in a different country could change the detected country, the average student's country of origin will be that of the detected country. Therefore conclusions should be viewed with this assumption in mind. There was a lower median retention time for detected International students (n=3926) than those detected to be in Great Britain (n= 1384). The aim of this analysis is to find ways that FutureLearn can better cater to all students and how they might better support those students. Therefore, further analysis into why the median is much lower for international students might be beneficial. Comparing English speaking countries to non-English speaking countries may allow for FutureLearn to determine if a language barrier plays a role in the lower median for International students. 
+A basic comparison between those detected to be International students and who were detected to be in Great Britain. To clarify this measure assumes that the detected country will be the same as the country of origin for that student which is most likely not the case for all students. However, using detected country of origin instead of reported country of origin can give us a more complete view as the many people did not provide their country. All further analysis will assume that, whilst virtual private networks and simply being in a different country could change the detected country, the average student's country of origin will be that of the detected country. Therefore conclusions should be viewed with this assumption in mind. There was a lower median retention time for detected International students (n=3926) than those detected to be in Great Britain (n= 1384). The aim of this analysis is to find ways that FutureLearn can better cater to all students and how they might better support those students. Therefore, further analysis into why the median is much lower for international students might be beneficial. Comparing majoritively English speaking countries to other countries may allow for FutureLearn to determine if a language barrier plays a role in the lower median for International students. 
 
 # Second Cycle
 
@@ -117,9 +117,22 @@ odds_increase
 The data frame above shows the result of the logistic regressions over the two conditions. The Percentage increase on the odds of purchasing the certificate was determined by computing the exponential function of the coefficient given by the logistic regression. The comparatively lower increase in for the retained for greater than or equal to 21 days group is due to the fact that there were far more in this group (people retained for 21 days or more) who did not buy the certificate. Both logistic regressions were shown to be significant at an alpha of 0.001.
 
 ```{r}
-
 steps_completed_chart
 ```
-Previously we showed last step students managed to complete, but this does not show the entire story. Individuals could compleate any combination of steps and therefore some information could be lost by only reporting the last.
+This graph shows the number of students that completed a task (dark colours) and the number of students that started the task (light coloured and outlined in black) n = 3892. 
 
-# number who completed step vs step number
+Previously we showed last step students managed to complete, but this does not show the entire story. Individuals could complete any combination of steps and therefore some information could be lost by only reporting the last step completed. Here we see that the dropout after each week is real but are reminded that compared to the large number of students to begin with this is a rather small drop off each time. The most consistent week appears to be week 3 where all bar one of the steps has a relatively stable number of completions and is confirmed by our first graph. Step 3.18 is severely underperforming perhaps due to it being the only clearly marked test on the course. Futurelearn might consider rebranding step 3.18 so that it is called a Quiz as other quizzes such as step 2.8 do not see such a dramatic decrease in participation (although it does see a relative dip in completions compared to how many people started it). The same slight decrease in completions occurs on step 3.11 another quiz. If step 3.18 is a particularly long step they might consider breaking it up across the third week to get more people to finish the whole thing.It is not unexpected that many people do not finish the first step as their is a high dropout rate in week 1 as shown in the first graph.
+
+```{r}
+student_language_plot
+```
+It seems that overall students from a country that majoritively speaks English as a first language (MSEFL) were retained for a longer median time than those from countries that did not speak English as a first language. However Information may be lost when taking such a top down view and further analysis might consider building linear regression models to determine which factors have the biggest predictive impact on retention time. Although for the scope of this report it is simply enough to be aware of this possible difference. It may also be beneficial for FutureLearn to be aware of the countries making up the majority of their course and so below we show countries with greater than 25 students on this course. To maximize the benefit to the students FutureLearn could consider which non MSEFL countries had the most students
+```{r}
+student_language_plot_25 
+```
+plot of countries vs retention time in days. The
+```{r}
+plot_countries
+```
+The plot above shows each country with 25 or more students and then the number of students from that country. 
+Notably SA (Saudi Arabia) students and IN (India) students make up the next greatest proportion of students after GB (Great Britain). FutureLearn should consider this important as these two countries have poor median retention times as seen in the previous graphs. Additionally, FutureLearn might consider if cultural differences effect the retention times for US (United States) Students as they have a poor median retention time compared to their English speaking counterparts. The US is the 4th biggest student base. 
