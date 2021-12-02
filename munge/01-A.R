@@ -145,11 +145,7 @@ another<-uni_ids%>%
   left_join(union(cyber.security.6_enrolments, cyber.security.7_enrolments), by=c("learner_id"))
 if(mean(uni_ids$learner_id==another$learner_id)==1){
   uni_ids$retention_time_days<-(uni_ids$date_of_last/86400)-(as.numeric(as.POSIXct(another$enrolled_at ,format="%Y-%m-%d %H:%M:%S"))/86400)} else(print("INVALID LEARNER ID ORDER"))# A quality control mechanism to ensure the learner IDs line up in each dataset
-new_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days),], aes(x=ifelse(is.na(pass), F, pass), y=retention_time_days))
-pass_graph<-new_boxplot_graph+geom_boxplot(aes(group=ifelse(is.na(pass), F, pass)))
-#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==F & !is.na(uni_ids$retention_time_days)))
-#length(which(ifelse(is.na(uni_ids$pass), F, uni_ids$pass==T)==T & !is.na(uni_ids$retention_time_days)))
-#commented out code to find sample sizes
+
 
 uni_ids$country<-another$detected_country
 uni_ids$country<-ifelse(uni_ids$country=="--", NA, uni_ids$country)

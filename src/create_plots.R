@@ -5,6 +5,8 @@ stage_complete<-bar_step+ggtitle("Stage Completed Most Recently vs Number of Stu
 correlation_matrix<-uni_ids[,c("pass", "question_score", "Q_count", "mean")]%>%
   as.matrix(nrow=nrow(uni_ids), ncol=3)%>%
   cor(use = "complete.obs", method="pearson")
+corr_caption<-"A correlation matrix of the whether or somone fully participated (pass), the number of right questions they answered (question_score), the number of questions they answered (Q_count) and the number of questions they got right out of the number of questions they answered (mean)."
+
 
 t_video<-data.frame(t(cyber.security.7_video.stats[,9:15]))
 t_video$percent<-c(5,10,25,50,75,95,100)
@@ -57,7 +59,7 @@ bar_step_reason<-ggplot(data=general_leaving_reason[-total,], aes(reasons, frequ
 single_reason<-bar_step_reason+scale_fill_brewer(palette = "Blues")+ theme(legend.position = "none",axis.text.x = element_text(debug = NULL))+ geom_col()+coord_flip()+ labs(title="Single Attempt Students Reasons for Leaving" ,x="Reasons", y="Frequency")
 
 new_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days) & !is.na(uni_ids$country),], aes(x=ifelse(country=="GB", "Great Britain", "International"), y=retention_time_days))
-student_country_plot<-new_boxplot_graph+geom_boxplot(aes(group= ifelse(country=="GB", "Great Britain", "International")))
+student_country_plot<-new_boxplot_graph+geom_boxplot(aes(group= ifelse(country=="GB", "Great Britain", "International")))+labs(title="Boxplots For Retention Time Split by student Inter or Intra Nationality",y="Retention Time in Days", x="Student detected to be in Great Britain or International")
 #length(which(ifelse(uni_ids$country=="GB", "Great Britain", "International")=="Great Britain" & !is.na(uni_ids$country)))
 #length(which(ifelse(uni_ids$country=="GB", "Great Britain",
 #"International")=="International" & !is.na(uni_ids$country)))
@@ -75,7 +77,7 @@ bar_data<-arrange(bar_data, purchased)
 #bar_data$purchased<-factor(bar_data$purchased, levels=bar_data$purchased)
 bar_data$subsection<-factor(bar_data$subsection, levels=bar_data$subsection)
 plot_bar<-ggplot(data=bar_data, aes(subsection,purchased))
-purchase_bar<-plot_bar + geom_col(fill="#ADD8E6") + theme(legend.position = "none")+geom_text(aes(label = purchased), vjust = 2)
+purchase_bar<-plot_bar + geom_col(fill="#ADD8E6") + theme(legend.position = "none")+geom_text(aes(label = purchased), vjust = 2)+labs(title="Groups by Certificate purchases", x="Groups", y="Number of Certificate Purchases")
 
 #Logisitic regressions to show increase in odds ratio of buying certificate
 uni_ids$na_pass<-ifelse(is.na(uni_ids$pass), F, uni_ids$pass)
@@ -89,7 +91,7 @@ retained_21_plus<-logit_link(retention_TF)[1]
 retained_short<-logit_link(retention_TF)[2]
 
 probs_data<- data.frame(Condition=c("Fully Participated", "Retained >= 21 days"), 'Probability When Not'=c(DNF_p, retained_short), 'Probability Given'=c(fully_paticipated_p, retained_21_plus))
-
+colnames(probs_data)<- c("Condition", "Probability When Not", "Probability Given Conditon")
 #Barchart of steps completed
 steps_completed_chart_ggplot<-ggplot(data= step_completions, aes(names.completions.))
 
@@ -99,14 +101,14 @@ steps_completed_chart<-steps_completed_chart_ggplot + labs(title="Students who S
 #These countries were determined to speak English as a first language in the majority.
 maj_ENG_speak<-c("GB","NZ", "US", "AU", "CA" ,"IE")
 language_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days) & !is.na(uni_ids$country),], aes(x=ifelse(country %in% maj_ENG_speak, "Majority Speak English as 1st Language ", "Other Languages Spoken 1st"), y=retention_time_days))
-student_language_plot<-language_boxplot_graph+geom_boxplot(aes(group= ifelse(country %in% maj_ENG_speak, "Majority Speak English as 1st Language ", "Other Languages Spoken 1st")))
+student_language_plot<-language_boxplot_graph+geom_boxplot(aes(group= ifelse(country %in% maj_ENG_speak, "Majority Speak English as 1st Language ", "Other Languages Spoken 1st")))+labs(title="Retention Time by Whether the Student's Detected Country \nPrimarily Speaks English", x="Groups", y="Retention Time in Days")
 
 #Remove countries that had less than 25 students as their boxplots are misleading
 country_positions_to_consider<-which(uni_ids$country%in%country_retention[country_retention$n>=25,"country_name"] & !is.na(uni_ids$retention_time_days))
 language_boxplot_graph_25<- ggplot(data=uni_ids[country_positions_to_consider,], aes(x=country, y=retention_time_days, fill=(ifelse(country %in% maj_ENG_speak,1,"none"))))
-student_language_plot_25<-language_boxplot_graph_25+geom_boxplot(aes(country, retention_time_days))+ theme(legend.position = "none")
+student_language_plot_25<-language_boxplot_graph_25+geom_boxplot(aes(country, retention_time_days))+ theme(legend.position = "none")+labs(title="Retention Time by Student's Detected Country", x="Detected Country", y="Retention Time in Days")
 
-plot_countries<-ggplot(data = country_retention[country_retention$n_All>25,], aes(country_name, y=n_All))+geom_col()+ coord_flip()
+plot_countries<-ggplot(data = country_retention[country_retention$n_All>25,], aes(country_name, y=n_All))+geom_col()+ coord_flip()+labs(title="Number of Students Enrolled by Country", y="Number of Students Enrolled", x="Detected Country")
 
 #+geom_text(data = country_retention, aes(x=country_name, label = n), position = position_dodge(width = .75),show.legend = FALSE)
 
