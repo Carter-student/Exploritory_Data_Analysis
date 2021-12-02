@@ -112,9 +112,9 @@ For all the analysis so far we have assumed that purchasing the course certifica
 
 
 ```{r}
-odds_increase
+probs_data
 ```
-The data frame above shows the result of the logistic regressions over the two conditions. The Percentage increase on the odds of purchasing the certificate was determined by computing the exponential function of the coefficient given by the logistic regression. The comparatively lower increase in for the retained for greater than or equal to 21 days group is due to the fact that there were far more in this group (people retained for 21 days or more) who did not buy the certificate. Both logistic regressions were shown to be significant at an alpha of 0.001.
+The data frame above shows the result of 2 separate logistic regressions over the two conditions. The probabilities given were found with the logit link function (lib/helpers.R). Both logistic regressions were shown to be significant at an alpha of 0.001. The probability of purchasing the certificat given that the student fully participated was over 0.5 and would be considered high enough in classification models to classify that person as a purchaser. while that was not the aim of this analysis it is clear that both of these conditions have an impact on whether or not a student would buy the course.
 
 ```{r}
 steps_completed_chart

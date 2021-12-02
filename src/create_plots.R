@@ -83,11 +83,12 @@ fully_p<-glm(purchase_TF~na_pass, data = uni_ids, family="binomial")
 retention_time<-glm(purchase_TF~retention_time_days, data = uni_ids, family="binomial")
 uni_ids<-mutate(uni_ids, retention_21= ifelse(retention_time_days>=21,1,0))
 retention_TF<-glm(purchase_TF~retention_21, data = uni_ids, family="binomial")
-odds_increase<-c(exp(coef(fully_p)[2]), exp(coef(retention_TF)[2]))
-odds_increase<-odds_increase-1
-odds_increase<-odds_increase*100
-odds_increase<-paste(round(odds_increase,2), c("%", "%"), sep="")
-odds_increase<- data.frame(Condition=c("Fully Participated", "Retained >= 21 days"), Percentage_Increase=odds_increase)
+fully_paticipated_p<-logit_link(fully_p)[1]
+DNF_p<-logit_link(fully_p)[2]
+retained_21_plus<-logit_link(retention_TF)[1]
+retained_short<-logit_link(retention_TF)[2]
+
+probs_data<- data.frame(Condition=c("Fully Participated", "Retained >= 21 days"), 'Probability When Not'=c(DNF_p, retained_short), 'Probability Given'=c(fully_paticipated_p, retained_21_plus))
 
 #Barchart of steps completed
 steps_completed_chart_ggplot<-ggplot(data= step_completions, aes(names.completions.))
@@ -116,3 +117,8 @@ plot_countries<-ggplot(data = country_retention[country_retention$n_All>25,], ae
 #language_boxplot_graph<- ggplot(data=uni_ids[!is.na(uni_ids$retention_time_days) & !is.na(uni_ids$country),], aes(country, y=retention_time_days,fill=(ifelse(country %in% maj_ENG_speak,1,"none"))))
 #student_language_plot<-language_boxplot_graph+geom_boxplot()+ theme(legend.position = "none")+ coord_flip()+theme(axis.text=element_text(size=6))
 #student_language_plot
+
+#odds_increase<-c(exp(coef(retention_time)[2]), exp(coef(retention_time)[2]))
+#odds_increase<-odds_increase-1
+#odds_increase<-odds_increase*100
+#odds_increase<-paste(round(odds_increase,2), c("%", "%"), sep="")
