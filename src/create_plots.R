@@ -50,7 +50,9 @@ statment7<-paste(store_score*100,"% of the non repeat students finished the cour
 unenroll_score<-mean(ifelse(uni_ids$unenroll_date==""|is.na(uni_ids$unenroll_date), 0,1 )) %>%
   round(4)
 statment8<-paste(unenroll_score*100, "% of the non repeat students unenrolled from the course", sep="" )
-
+duplicate_purchases<-sum(first_attempt$learner_id[first_attempt$purchased_statement_at!=""] %in% second_attempt$learner_id[second_attempt$purchased_statement_at!=""])
+purchases<-(sum(cyber.security.7_enrolments$purchased_statement_at!="")+sum(cyber.security.6_enrolments$purchased_statement_at!=""))%>%
+  paste("Purchases of a certificate including", duplicate_purchases, "repeat students who bought twice", sep=" ")
 
 #We remove total from the bar chart as it is not relevant, NA has no occurrences due to
 #the way we made this dataset so it can be ignored as well
@@ -80,10 +82,8 @@ plot_bar<-ggplot(data=bar_data, aes(subsection,purchased))
 purchase_bar<-plot_bar + geom_col(fill="#ADD8E6") + theme(legend.position = "none")+geom_text(aes(label = purchased), vjust = 2)+labs(title="Groups by Certificate purchases", x="Groups", y="Number of Certificate Purchases")
 
 #Logisitic regressions to show increase in odds ratio of buying certificate
-uni_ids$na_pass<-ifelse(is.na(uni_ids$pass), F, uni_ids$pass)
 fully_p<-glm(purchase_TF~na_pass, data = uni_ids, family="binomial")
 retention_time<-glm(purchase_TF~retention_time_days, data = uni_ids, family="binomial")
-uni_ids<-mutate(uni_ids, retention_21= ifelse(retention_time_days>=21,1,0))
 retention_TF<-glm(purchase_TF~retention_21, data = uni_ids, family="binomial")
 fully_paticipated_p<-logit_link(fully_p)[1]
 DNF_p<-logit_link(fully_p)[2]

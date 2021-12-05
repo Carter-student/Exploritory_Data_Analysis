@@ -163,6 +163,9 @@ retention_time_students<-sapply(country_list, function(i){
 #feeds data from sapply function into dataframe 
 country_retention<-data.frame(country_name=country_list, n=retention_time, n_All=retention_time_students )
 
+#retention infromation for logistic regression
+uni_ids$na_pass<-ifelse(is.na(uni_ids$pass), F, uni_ids$pass)
+uni_ids<-mutate(uni_ids, retention_21= ifelse(retention_time_days>=21,1,0))
 
 
 

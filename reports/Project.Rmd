@@ -10,7 +10,6 @@ header-includes:
 output: pdf_document
 
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_knit$set(root.dir= normalizePath('..'))
@@ -26,7 +25,32 @@ load.project()
 source('src/create_plots.R')
 ```
 ## Business Understanding
-Data provided by FutureLearn, a for profit online education provider, have provided us with a large dataset to analyse and draw conclusions from. #Clarify Business objectives here 
+FutureLearn, a for profit online education provider, have provided us with a large dataset to analyse and draw conclusions from. To draw relevant and meaningful conclusions for FurtureLearn we must first outline FutureLearn's business objectives. As FutureLearn is a for profit education provider it is clear that their long term objectives include the financial stability and profitability of the company. To this end we might consider that the metric most important to FutureLearn, when considering this free course, would be one that measures the number of students purchasing a completion certificate. Indeed this is one measure which we may keep track of over the course. We later learn that only 54 purchases by non-repeat students occur out of 5313 enrolled students over the 2 last runs. It is possible that costs are low enough per course that this low number of sales for a individual courses is sufficient for the company to reach a profit. However we also must consider that perhaps the course serves the purpose of enticing students with a free course and familiarising them with the FutureLearn learning platform so that in the future they might return for a paid course. In brief the course may effectively serve as a form of advertisement for FutureLearn. 
+
+
+Regardless, in keeping with both of the possible objectives for the course is the need for the course to engage students. We assume an engaged student is more likely to return to FutureLearn in the future and purchase another of their courses and, importantly for the data we have, is more likely to purchase a certificate at the end of the course. By measuring engagement in a step dependent way we would be able to determine if any steps are failing to engage students. Additionally, we should identify subgroups so that differences between them might be viewed. To ensure that the conclusions are as relevant to the company going forward as possible we will only consider the last 2 runs of the course (run 6 and 7) as the course noticeably changes over the 7 runs provided. Therefore our plan is two use run 6 and 7 data to find useful estimates of engagement.
+```{r, include=FALSE}
+n_for_sentiment<-(sum(!is.na(cyber.security.6_weekly.sentiment.survey.responses$experience_rating)) +
+  sum(!is.na(cyber.security.7_weekly.sentiment.survey.responses$experience_rating))) %>%
+  paste("responses to the weekly sentiment survery")%>%
+  print()#calculates the number of experience_ratings from run 6 and 7
+```
+
+## Data Understanding and Data Preparation (Business Understanding relavant)
+```{r}
+n_for_sentiment
+```
+
+There are various ways which we considered measuring engagement using the datasets available. One useful measure may have been weekly sentiment scores, however the number of respondents for each week was determined to be insufficient (n=180) across the two datasets being used. Additionally it experience ratings tended to be more positive than negative and so the number of responses which could have been used for improvement purposes (i.e scores of 1) were even smaller than the number of responses. In the future FutureLearn could consider giving a wider scale from 1 to 10 so that more variation in responses could be recorded. With this in mind we decided to define engagement by its opposite, disengagement. Completing no more of the course was considered to be a lack of engagement, so was unenrolling and a lack of step completion (second cycle). Using these measures in combination with retention time (n= 2406, calculated by working out the time difference between enrollment and completing their last step) provided enough usable data to perform our analysis. Retention time was considered a measure of engagement with greater values being an indicator of further engagement. We consider 21 days of retention to be and important boundary as this is a 3 week course. We also initially attempt to use metrics from the question response dataset to provide an estimator of engagement.
+
+To achieve this we prepared our primary dataset called uni_ids (See Summary 1) which is composed of information from the following datasets: enrollments, step activity and question response. Dates were converted to numerical form for handling them. The numerical form is the distance in seconds from 1/1/1970. The pass column is True if the student has a pass date and False if the student has an unenroll date. the pass column is NA if the student has neither a pass nor a unenroll date. The mean refers to the number of correct answers answered in the quiz questions divided by the total number of answered questions. The Q_count is the number of Quiz questions answered. The question score is the number of quesetions answered correctly. The last step complete refers to the last step completed (maximum date step completed date for each student that completed a step). The letter code is that last step completed converted into letters so that it can be sorted with 1.1 becoming "aa" and 2.1 becoming "ba" (each number indexes the alphabet). Retention time in days is the retention time in days (retention time in seconds/86400). Country refers to the detected country of the student. Week_number refers to the week in which they completed their last step and question score is simply the number of right answers a student achieved. The purchase, na_pass and retention_TF variable was added into the preprocessing during the second cycle and so are ignored throughout the first cycle but are boolean and booleanesque variables. NAs are retained in uni_ids but are not considered when graphs are plotted unless stated (NAs removed). Later in the second cycle na_pass was created which identifys NAs as FALSE from the pass column as they did not fully participate. Figure 1 shows that the retention time in days is heavily skewed to the right in the mold of something like a poisson distribution which is what we might expect for this data. The data for retention time presents no immediate quality issues, although it is somewhat unexpected that some students completed steps past 80 days. Repeat students who are in run 6 and 7 are removed from uni_ids and analysed separately.
+
+```{r, fig.dim = c(8, 3.5),fig.cap="Histogram showing retention time in days for n=2046 students."}
+hist(uni_ids$retention_time_days, xlab="Retention Time in Days"
+     , main="Histogram of Retention Time in Days")
+```
+
+
 
 \newpage
 \clearpage
@@ -38,36 +62,31 @@ summary(uni_ids)
 ```
 Summary 1. A summary of all of the data collected into the primary dataset used throughout. The data frame uni_ids is named after its 1st column filled with learner ids.
 \newpage
-
-A summary of the data collected so far. Pass date and unenroll date have been converted to numerical to aid in the processing of data. The pass column is True if the student has a pass date and False if the student has an unenroll date. the pass column is NA if the student has neither a pass nor a unenroll date. The mean referes to the number of correct answers answered in the quiz questions divided by the total number of answered questions. The Q_count is the number of Quiz questions answered. The last step complete refers to the last step completed. The letter code is that last step completed converted into letters so that it can be sorted with 1.1 becoming "aa" and 2.1 becoming "ba" (each number indexes the alphabet). Week_number refers to the week in which they completed their last step and question score is simply the number of right answers a student achieved. The purchase variable was added into the preprocessing during the second cycle and so is ignored throughout the first cycle.
-
-FutureLearn have an interest in students finishing the course so that they might opt into buying the certificate at the end of the process. In order to complete the course a student must complete the pre-requesite steps over the 3 weeks. To see how far students get in the course we plotted a bar chart of the course steps against the number of students who's most recently completed stage was that step (See figure below). We used datasets 6 and 7 to achieve the figure immediately below.
-
+## Modelling/Deployment
 ```{r, fig.cap="Barchart Graph showing the stage completed most recently with the height of the bars the number of students that completed that step last"}
  #scale_fill_manual uni_ids$last_step_completed
 stage_complete
 ```
 
-It is worth noting of the graph above that week 1 in general appears to have the most people continue no further. Additionally there is a spike at the very end of the 1st two weeks indicating that after that week the student completed no more steps. FutureLearn could foucus their efforts on smoothing over the periods between the weeks as much as possible so that students are ready to rejoin the following week. This could be achieved by reminding the students of the upcoming week and next load of steps. However, an alternative method might be to experiment with where the hardest parts of the workload fall for each week. In other words FurtureLearn could investigate as to whether putting the hardest part of the coursework  in the middle part of the steps for a given week prevents the spike at the end of the week. 
+FutureLearn have an interest in students finishing the course so that they might opt into buying the certificate at the end of the process. In order to complete the course a student must complete the pre-requesite steps over the 3 weeks. To see how far students get in the course we plotted a bar chart of the course steps against the number of students who's most recently completed stage was that step (See Figure 2). We assume that the last step completed is the furtherest step along that the student completed. It is worth noting that week 1 appears to have the most people continue no further. Additionally there is a spike at the very end of the 1st two weeks indicating that after that week the student completed no more steps. FutureLearn could focus their efforts on smoothing over the periods between the weeks as much as possible so that students are ready to rejoin the following week. This could be achieved by reminding the students of the upcoming week and next load of steps. However, an alternative method might be to experiment with where the hardest parts of the workload fall for each week. In other words FurtureLearn could investigate as to whether putting the hardest part of the coursework in the middle part of the steps for a given week prevents the spike at the end of the week. 
 
 
 ```{r}
 knitr::kable(correlation_matrix, caption=corr_caption)
 ```
 
-
-Although only dealing with n=68 the above shows that Q_count may positively correlate to finishing the course. This would be expected as people who finish the course answer more questions.That this is not as strong a correlation as it could be indicates that some people who pass the course may not have answered more questions than those who stopped. The small negative correlation between mean and pass may be due to those who finished only a on question and got it right (thus mean=1) and then did not finish any more of the course. Therefore it is clear that mean (quiz percentage of correct answers) would not be a good metric for identifying engagement as it cannot distinguish those who answer many questions and score well from those who score well and answer many questions.
+Having considered how the individual steps correlate to student progression, we decided to investigate how other variables correlate to finishing all the steps (pass).  Although only dealing with n=68 Table 1 shows that Q_count may positively correlate to finishing the course. This would be expected as people who finish the course answer more questions. That this is not as strong a correlation as it could be indicates that some people who pass the course may not have answered more questions than those who stopped. The small negative correlation between mean and pass may be due to those who finished only a on question and got it right (thus mean=1) and then did not finish any more of the course. Therefore it is clear that mean (quiz percentage of correct answers) would not be a good metric for identifying engagement as it cannot distinguish those who answer many questions and score well from those who score well and answer many questions. We the attempted to visualise part of the results in Figure 3. Figure 3 is not  very useful as it can be expected that those who completed the course answered more questions but it does confirm this. Ultimately, we consider these variables uninformative as they do not provide useful insight for FutureLearn or explain more than might have been expected upon further consideration. This may be due to the manner in which we decided to approach and consider these variables.
 ```{r, include=FALSE}
 #location<-getwd()
 #setwd(location)
 source('src/mean_vs_Q_count.R')
 ```
 
-```{r, fig.cap="Plot of percentage right answers out of all answers vs the number of questions answered. Coloured in Red are people who fully particpated whilst those in blue did not."}
+```{r, fig.cap="Plot of percentage right answers out of all answers vs the number of questions answered. Coloured in Red are people who fully particpated whilst those in blue did not. Students who did not answer any questions are not considered but those who had neither a full participaation date nor a unenrollment date are considered to have not fully participated."}
 mean_vs_Q_count
 ```
 
-Plotting percentage of correct answers divided by 100 against the number of questions answered. The at points are coloured red if we know that they fully participated. This plot is not  very useful as it can be expected that those who completed the course answered more questions completed the course but it does again confirm this.
+
 
 ```{r, fig.cap="Plot of Percentage of Video shown vs Percentage of students still Watching, colours vary for differeent videos "}
 plot(rep(c(5,10,25,50,75,95,100),13), t(cyber.security.7_video.stats[,9:15]),
@@ -85,7 +104,7 @@ This graph shows that as the videos continue the range of the percentage of peop
 ```{r, fig.cap= "Output from statistical analysis"}
 cat(statmentm2, "\n", statementm1, "\n", statment0, "\n", statement1,
     "\n", statment2, "\n", statment3, "\n", statment4, "\n", statement5,
-    "\n", statment6, "\n", statment7, "\n", statment8, "\n")
+    "\n", statment6, "\n", statment7, "\n", statment8, "\n", purchases, "\n")
 ```
 
 Students who were found to be on the course in datasets 6 and 7 are assumed to have taken the course at least twice. They have not been included in our analysis so far and so now we seek to understand what happened to these students. 5 of the students who have a recorded fully participated date were in both datasets and one of them went on to have another fully participated date. It seems that the repeat students finished the course the first time at a rate greater than the non-repeat students which might be expected if they liked the course enough to complete it the first time and then enroll again. A greater proportion of repeat students unenrolled in their first attempt than the single attempt sample. Perhaps due to not enough time in the first attempt and then trying again the second time once they thought they had time. However, nobody who had not already finished the course in their first attempt finished the course in their second attempt suggesting that whatever the reason their first attempt ended prematurely may have also ended their second attempt. The reason for leaving the first and second time may be found in the leaving survey.
@@ -134,11 +153,11 @@ A basic comparison between those detected to be International students and who w
 
 # Second Cycle
 
-```{r, fig.cap= "Barchart showing certificate purchases by Group"}
+```{r, fig.cap= "Barchart showing certificate purchases by Group for Non-Repeat Students"}
 purchase_bar
 ```
 
-For all the analysis so far we have assumed that purchasing the course certificate was more likely if the individual finished the course. Before continuing we should confirm that assumption. With the limited dataset currently being used we show that twice as many people who fully participated in the course purchased the certificate. We also showed that those with a retention time of 21 days or made up over half of the people who bought the course. As we only utilise a dataset with only 54 people purchasing the certificate the proportions found here could be non representative of which people will purchase certificates in the future. However, these categories are very likely to represent an increase in the likelihood that a person buys the certificate as determined by logistic regression (see below) 
+For all the analysis so far we have assumed that purchasing the course certificate was more likely if the individual finished the course. Before continuing we should confirm that assumption. With the limited dataset currently being used we show that twice as many people who fully participated in the course purchased the certificate. We also showed that those with a retention time of 21 days or made up over half of the people who bought the course. As we only utilise a dataset with only 54 people purchasing the certificate the proportions found here could be non representative of which people will purchase certificates in the future. However, these categories are very likely to represent an increase in the likelihood that a person buys the certificate as determined by logistic regression (see below). 
 
 
 ```{r}
