@@ -1,4 +1,5 @@
 #Perform Analysis and Create plots
+#Figure 2 created removing students with incomplete last_step_completed information
 bar_step<-ggplot(data=uni_ids[!is.na(uni_ids$last_step_completed),], aes(last_step_completed, fill=as.character(week_number)))
 stage_complete<-bar_step+ggtitle("Stage Completed Most Recently vs Number of Students") + labs(x="Stage Completed Most Recently", y="Number of Students")+ theme(axis.text.x = element_text(angle = 90, hjust = 1))+ scale_fill_discrete(name="Week:")+geom_bar()
 
