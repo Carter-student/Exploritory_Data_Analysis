@@ -1,5 +1,5 @@
 ---
-title: "Project"
+title: "FutureLearn Data Mining and Analysis"
 author: "170339779"
 
 header-includes:
@@ -12,7 +12,7 @@ output: pdf_document
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)#pdf setup
-knitr::opts_knit$set(root.dir= normalizePath('..'))
+knitr::opts_knit$set(root.dir= normalizePath('..'))#route directory setup
 ```
 
 
