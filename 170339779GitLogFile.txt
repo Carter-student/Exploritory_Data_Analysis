@@ -1,0 +1,77 @@
+commit 9a2465e8103b3b68371f9b0b91a31ba92747b583
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Tue Dec 7 13:46:09 2021 +0000
+
+    Final comments added
+
+commit 8ea2d2a05b4b882e6bdd76f5de0269964431ff0b
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Mon Dec 6 14:49:15 2021 +0000
+
+    added comments to preprocessing
+
+commit 54f3f27f5d20a5ee180015da4ec59a8cd9370f28
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Sun Dec 5 20:43:18 2021 +0000
+
+    First Cycle fully written up
+
+commit 1e4cf22331d2fae0d276373ff0f82117ba996457
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Sun Dec 5 18:53:15 2021 +0000
+
+    Added text describing Business Objective, reformatted figure 1 to fit in space available
+
+commit 9067a3e7c65b7ccfa3e6f1c1817fd61fcdea9ddc
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Thu Dec 2 14:22:09 2021 +0000
+
+    Every table, and figure now has a caption.
+
+commit 9fae392a9878b4f644460a708431175917d6148a
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Thu Dec 2 10:16:03 2021 +0000
+
+    Created logit link function in helpers and edited output from logistic regression
+
+commit fb769ab759af9ab2a9ab60c81b063b60903c7645
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Wed Dec 1 17:11:46 2021 +0000
+
+    Finished the second cycle graphs in basic form needs tidying up
+
+commit daaa3ab487381646193560042a321f57d04699b8
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Tue Nov 30 19:10:50 2021 +0000
+
+    Moved analysis and  plot creation to src folder
+
+commit 25cb1381775ad8edc13ed7be165fec627212cb7e
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Sun Nov 28 18:39:32 2021 +0000
+
+    Added another graph to the first cycle showing country vs retention time
+
+commit ccbf215699204adc5b42d0918730e605c51ffa0e
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Sat Nov 27 16:09:09 2021 +0000
+
+    Added the last graph of the first cycle a boxplot of retention time
+
+commit ddf077493a26f7b123f110bd53aa26462f64b0fb
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Sat Nov 27 15:26:13 2021 +0000
+
+    added first cycle analysis and graphs
+
+commit a37d58325071faca8256f45648cdf8254e59978e
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Thu Nov 25 17:59:31 2021 +0000
+
+    Added preprocessing in munge which creates uni_ids dataframe to be used later, also added first graph to reports
+
+commit dec2578ee589dad07e06dbb08d6e4892e2536896
+Author: Carter Levy <b7033977@ncl.ac.uk>
+Date:   Thu Nov 4 19:27:55 2021 +0000
+
+    Initialised directory and with ProjectTemplate
