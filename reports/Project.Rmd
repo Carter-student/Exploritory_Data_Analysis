@@ -108,20 +108,36 @@ cat(statmentm2, "\n", statementm1, "\n", statment0, "\n", statement1,
 ```
 Summary 2: shows a summary of the repeat student data with information from the non repeat students for comparison. Also includes Purchase from all students. We assume students did not finish if they lack a fully participated date (empty values). 
 ## Leaving Reasons
-```{r}
+```{r, include=FALSE}
 leaving_reason<-left_join(repeat_students,
                           cyber.security.6_leaving.survey.responses,
                           by=c("learner_id"))
-knitr::kable(leaving_reason[!is.na(leaving_reason$leaving_reason),
-                            "leaving_reason"],
-caption="Table of leaving reasons for repeat students in the 6th datset (their first monitored attempt)")
+leaving_reason<-leaving_reason[!is.na(leaving_reason$leaving_reason),"leaving_reason"]
+leaving_reason$leaving_reason<- sapply(leaving_reason$leaving_reason, function(x){
+  str_replace(x, pattern="â€™",replacement="'")})
+table_caption="Table of leaving reasons for repeat students in the 6th datset (their first monitored attempt)"
 #creates table of leaving reasons
 ```
 
 ```{r}
+#creates table of leaving reason
+knitr::kable(leaving_reason[,"leaving_reason"],caption=table_caption)
+```
+
+```{r, include=FALSE}
 leaving_reason2<-left_join(repeat_students, cyber.security.7_leaving.survey.responses, by=c("learner_id"))
-knitr::kable(leaving_reason2[!is.na(leaving_reason2$leaving_reason), "leaving_reason"], caption = "Table of leaving reasons for repeat students in the 7th datset (their second monitored attempt)")
+leaving_reason2<-leaving_reason2[!is.na(leaving_reason2$leaving_reason), "leaving_reason"]
+leaving_reason2$leaving_reason<- sapply(leaving_reason2$leaving_reason, function(x){
+  str_replace(x, pattern="â€™",replacement="'")})
+caption_table2<-"Table of leaving reasons for repeat students in the 7th datset (their second monitored attempt)"
+
+```
+
+```{r}
 #creates table of leaving reasons
+
+knitr::kable(leaving_reason2, caption =caption_table2 )
+
 ```
 Half of all the replies from repeat students in Table 2 say that they did not have enough time for the course as we suggested previously. Only one says that the course was too easy and the others preferred not to say. For the second attempt it seems that once again the take away from the repeat students is that they left because they did not have enough time. Repeat students may require a less intensive course that could be better managed with a shorter amount of free time. Therefore, we can  conclude that a large portion of the repeat students are highly engaged but lack the time to finish the course, it may be worth extending the course for these students and spreading out the workload to aid completion rates. We visualise the leaving reasons for single attempt students in figure 6 and Table 4.
 
