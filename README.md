@@ -1,6 +1,6 @@
 # FutureLearn_Project
 This  project was completed for my MSc in Data Science Exploratory Data Analysis Module. 
-**To view my report and analysis go to reports/Project.pdf.**
+**To view my report and analysis go to reports/Project_Report.pdf.**
 
 # Project Template info
 Welcome to ProjectTemplate!
