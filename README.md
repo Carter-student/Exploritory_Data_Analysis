@@ -1,11 +1,9 @@
 # FutureLearn_Project
+This  project was completed for my MSc in Data Science Exploratory Data Analysis Module. 
+**To view my report and analysis go to reports/Project.pdf.**
 
+# Project Template info
 Welcome to ProjectTemplate!
-
-This file introduces you to ProjectTemplate, but you should eventually replace
-the contents of this file with an introduction to your project. People who
-work with your data in the future will thank you for it, including your future
-self.
 
 ProjectTemplate is an R package that helps you organize your statistical
 analysis projects. Since you're reading this file, we'll assume that you've
